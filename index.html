@@ -1045,6 +1045,18 @@
       display: none !important;
     }
 
+    /* ── GREETING ── */
+    .greeting {
+      font-family: 'Syne', sans-serif;
+      font-size: 14px;
+      font-weight: 700;
+      color: var(--accent);
+      background: rgba(90, 158, 30, 0.08);
+      padding: 5px 14px;
+      border-radius: 20px;
+      white-space: nowrap;
+    }
+
     /* ── LOGIN SCREEN ── */
     .login-overlay {
       position: fixed;
@@ -1190,12 +1202,40 @@
     </div>
   </div>
 
+  <!-- PROFILE SETUP MODAL -->
+  <div class="modal-overlay" id="profileOverlay">
+    <div class="modal">
+      <h3>👋 Chào mừng! Hãy tạo hồ sơ</h3>
+      <div class="form-group">
+        <label>Tên hiển thị</label>
+        <input type="text" id="profileName" placeholder="Tên của bạn" />
+      </div>
+      <div class="form-group">
+        <label>Tuổi</label>
+        <input type="number" id="profileAge" placeholder="25" min="1" max="120" />
+      </div>
+      <div class="form-group">
+        <label>Giới tính</label>
+        <select id="profileGender">
+          <option value="">Chọn...</option>
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-save" style="flex:1" onclick="saveProfile()">Bắt đầu 🚀</button>
+      </div>
+    </div>
+  </div>
+
   <div id="appContent" class="hidden">
     <header>
       <div class="logo">
         <div class="logo-dot"></div>HabitFlow
       </div>
       <div class="header-right">
+        <span class="greeting" id="userGreeting"></span>
         <div class="date-display" id="headerDate"></div>
         <div class="streak-badge">🔥 <span id="globalStreak">0</span> ngày</div>
         <button class="add-btn" onclick="signOut()"
@@ -1352,6 +1392,7 @@
     // ─── STATE ────────────────────────────────────────────
     let habits = [];
     let logs = {};
+    let userProfile = null;
     let editId = null, currentTab = 'all', currentType = 'boolean', currentIncs = [];
 
     // ─── FIREBASE HELPERS ─────────────────────────────────
@@ -1365,19 +1406,20 @@
 
     async function loadFromFirebase() {
       const ref = getUserDataRef();
-      if (!ref) { habits = []; logs = {}; return; }
+      if (!ref) { habits = []; logs = {}; userProfile = null; return; }
       try {
         const doc = await ref.get();
         if (doc.exists) {
           const d = doc.data();
           habits = d.habits || [];
           logs = d.logs || {};
+          userProfile = d.profile || null;
         } else {
-          habits = []; logs = {};
+          habits = []; logs = {}; userProfile = null;
         }
       } catch (e) {
         console.error('Firebase load error:', e);
-        habits = []; logs = {};
+        habits = []; logs = {}; userProfile = null;
       }
     }
 
@@ -1385,11 +1427,50 @@
       if (!hasFirebase()) {
         localStorage.setItem('hf_habits', JSON.stringify(habits));
         localStorage.setItem('hf_logs', JSON.stringify(logs));
+        if (userProfile) localStorage.setItem('hf_profile', JSON.stringify(userProfile));
         return;
       }
       const ref = getUserDataRef();
       if (!ref) return;
-      ref.set({ habits, logs }).catch(e => console.error('Firebase save error:', e));
+      const data = { habits, logs };
+      if (userProfile) data.profile = userProfile;
+      ref.set(data).catch(e => console.error('Firebase save error:', e));
+    }
+
+    // ─── PROFILE ──────────────────────────────────────────
+    function updateGreeting() {
+      const el = document.getElementById('userGreeting');
+      if (userProfile && userProfile.name) {
+        el.textContent = 'Xin chào, ' + userProfile.name;
+        el.style.display = '';
+      } else {
+        el.textContent = '';
+        el.style.display = 'none';
+      }
+    }
+
+    function showProfileModal() {
+      document.getElementById('profileOverlay').classList.add('open');
+    }
+
+    function closeProfileModal() {
+      document.getElementById('profileOverlay').classList.remove('open');
+    }
+
+    function saveProfile() {
+      const name = document.getElementById('profileName').value.trim();
+      const age = parseInt(document.getElementById('profileAge').value) || null;
+      const gender = document.getElementById('profileGender').value || null;
+      if (!name) {
+        document.getElementById('profileName').focus();
+        document.getElementById('profileName').style.borderColor = 'var(--danger)';
+        return;
+      }
+      userProfile = { name, age, gender };
+      save();
+      closeProfileModal();
+      updateGreeting();
+      showAppAndRender();
     }
 
     // ─── AUTH ─────────────────────────────────────────────
@@ -1423,9 +1504,15 @@
       if (!hasFirebase()) {
         habits = JSON.parse(localStorage.getItem('hf_habits') || '[]');
         logs = JSON.parse(localStorage.getItem('hf_logs') || '{}');
+        userProfile = JSON.parse(localStorage.getItem('hf_profile') || 'null');
         document.getElementById('loginOverlay').classList.add('hidden');
         document.getElementById('appContent').classList.remove('hidden');
-        showAppAndRender();
+        if (!userProfile) {
+          showProfileModal();
+        } else {
+          updateGreeting();
+          showAppAndRender();
+        }
         return;
       }
       firebase.auth().onAuthStateChanged(async (user) => {
@@ -1433,7 +1520,12 @@
           await loadFromFirebase();
           document.getElementById('loginOverlay').classList.add('hidden');
           document.getElementById('appContent').classList.remove('hidden');
-          showAppAndRender();
+          if (!userProfile) {
+            showProfileModal();
+          } else {
+            updateGreeting();
+            showAppAndRender();
+          }
         } else {
           document.getElementById('loginOverlay').classList.remove('hidden');
           document.getElementById('appContent').classList.add('hidden');
