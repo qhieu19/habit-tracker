@@ -1045,6 +1045,32 @@
       display: none !important;
     }
 
+    /* ── PROFILE AVATAR BTN ── */
+    .profile-btn {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      border: 2px solid var(--accent);
+      background: rgba(90, 158, 30, 0.12);
+      color: var(--accent);
+      font-family: 'Syne', sans-serif;
+      font-size: 15px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+
+    .profile-btn:hover {
+      background: var(--accent);
+      color: #fff;
+      transform: scale(1.08);
+    }
+
     /* ── GREETING ── */
     .greeting {
       font-family: 'Syne', sans-serif;
@@ -1229,6 +1255,34 @@
     </div>
   </div>
 
+  <!-- EDIT PROFILE MODAL -->
+  <div class="modal-overlay" id="editProfileOverlay">
+    <div class="modal">
+      <h3>👤 Hồ sơ của bạn</h3>
+      <div class="form-group">
+        <label>Tên hiển thị</label>
+        <input type="text" id="editProfileName" placeholder="Tên của bạn" />
+      </div>
+      <div class="form-group">
+        <label>Tuổi</label>
+        <input type="number" id="editProfileAge" placeholder="25" min="1" max="120" />
+      </div>
+      <div class="form-group">
+        <label>Giới tính</label>
+        <select id="editProfileGender">
+          <option value="">Chọn...</option>
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditProfileModal()">Hủy</button>
+        <button class="btn-save" onclick="saveEditProfile()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
   <div id="appContent" class="hidden">
     <header>
       <div class="logo">
@@ -1238,6 +1292,7 @@
         <span class="greeting" id="userGreeting"></span>
         <div class="date-display" id="headerDate"></div>
         <div class="streak-badge">🔥 <span id="globalStreak">0</span> ngày</div>
+        <button class="profile-btn" id="profileAvatarBtn" onclick="openEditProfile()" title="Hồ sơ của bạn"></button>
         <button class="add-btn" onclick="signOut()"
           style="background:var(--surface2);color:var(--text);border:1px solid var(--border);" title="Đăng xuất">Đăng
           xuất</button>
@@ -1440,12 +1495,15 @@
     // ─── PROFILE ──────────────────────────────────────────
     function updateGreeting() {
       const el = document.getElementById('userGreeting');
+      const avatarBtn = document.getElementById('profileAvatarBtn');
       if (userProfile && userProfile.name) {
         el.textContent = 'Xin chào, ' + userProfile.name;
         el.style.display = '';
+        avatarBtn.textContent = userProfile.name.charAt(0);
       } else {
         el.textContent = '';
         el.style.display = 'none';
+        avatarBtn.textContent = '?';
       }
     }
 
@@ -1469,8 +1527,39 @@
       userProfile = { name, age, gender };
       save();
       closeProfileModal();
+      closeEditProfileModal();
       updateGreeting();
       showAppAndRender();
+    }
+
+    // ─── EDIT PROFILE ────────────────────────────────────
+    function openEditProfile() {
+      const modal = document.getElementById('editProfileOverlay');
+      if (userProfile) {
+        document.getElementById('editProfileName').value = userProfile.name || '';
+        document.getElementById('editProfileAge').value = userProfile.age || '';
+        document.getElementById('editProfileGender').value = userProfile.gender || '';
+      }
+      modal.classList.add('open');
+    }
+
+    function closeEditProfileModal() {
+      document.getElementById('editProfileOverlay').classList.remove('open');
+    }
+
+    function saveEditProfile() {
+      const name = document.getElementById('editProfileName').value.trim();
+      const age = parseInt(document.getElementById('editProfileAge').value) || null;
+      const gender = document.getElementById('editProfileGender').value || null;
+      if (!name) {
+        document.getElementById('editProfileName').focus();
+        document.getElementById('editProfileName').style.borderColor = 'var(--danger)';
+        return;
+      }
+      userProfile = { name, age, gender };
+      save();
+      closeEditProfileModal();
+      updateGreeting();
     }
 
     // ─── AUTH ─────────────────────────────────────────────
@@ -1834,6 +1923,7 @@
     }
 
     document.getElementById('modalOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeModal(); });
+    document.getElementById('editProfileOverlay').addEventListener('click', e => { if (e.target === e.currentTarget) closeEditProfileModal(); });
     function setTab(tab, el) { currentTab = tab; document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active'); render(); }
     function updateDate() { document.getElementById('headerDate').textContent = new Date().toLocaleDateString('vi-VN', { weekday: 'long', day: 'numeric', month: 'long' }); }
 
