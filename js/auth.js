@@ -90,6 +90,35 @@ function saveProfile() {
     if (typeof onAuthReady === 'function') onAuthReady();
 }
 
+// ─── EDIT PROFILE POPUP ───────────────────────────────
+function openEditProfile() {
+    if (!userProfile) return;
+    document.getElementById('editProfileName').value = userProfile.name || '';
+    document.getElementById('editProfileAge').value = userProfile.age || '';
+    document.getElementById('editProfileGender').value = userProfile.gender || '';
+    document.getElementById('editProfileOverlay').classList.add('open');
+}
+
+function closeEditProfileModal() {
+    document.getElementById('editProfileOverlay').classList.remove('open');
+}
+
+function saveEditProfile() {
+    const name = document.getElementById('editProfileName').value.trim();
+    const age = parseInt(document.getElementById('editProfileAge').value) || null;
+    const gender = document.getElementById('editProfileGender').value || null;
+    if (!name) {
+        document.getElementById('editProfileName').focus();
+        return;
+    }
+    userProfile = { name, age, gender };
+    save();
+    closeEditProfileModal();
+    updateGreeting();
+    if (typeof renderProfile === 'function') renderProfile(); // For profile.html if still used
+    if (typeof render === 'function') render(); // For index.html
+}
+
 // ─── AUTH ─────────────────────────────────────────────
 async function signInWithGoogle() {
     if (!hasFirebase()) {

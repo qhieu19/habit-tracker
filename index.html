@@ -70,6 +70,34 @@
     </div>
   </div>
 
+  <!-- EDIT PROFILE MODAL (popup) -->
+  <div class="modal-overlay" id="editProfileOverlay">
+    <div class="modal">
+      <h3>👤 Hồ sơ của bạn</h3>
+      <div class="form-group">
+        <label>Tên hiển thị</label>
+        <input type="text" id="editProfileName" placeholder="Tên của bạn" />
+      </div>
+      <div class="form-group">
+        <label>Tuổi</label>
+        <input type="number" id="editProfileAge" placeholder="25" min="1" max="120" />
+      </div>
+      <div class="form-group">
+        <label>Giới tính</label>
+        <select id="editProfileGender">
+          <option value="">Chọn...</option>
+          <option value="male">Nam</option>
+          <option value="female">Nữ</option>
+          <option value="other">Khác</option>
+        </select>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditProfileModal()">Hủy</button>
+        <button class="btn-save" onclick="saveEditProfile()">Lưu thay đổi</button>
+      </div>
+    </div>
+  </div>
+
   <div id="appContent" class="hidden">
     <header>
       <div class="logo">
@@ -79,8 +107,7 @@
         <span class="greeting" id="userGreeting"></span>
         <div class="date-display" id="headerDate"></div>
         <div class="streak-badge">🔥 <span id="globalStreak">0</span> ngày</div>
-        <button class="profile-btn" id="profileAvatarBtn" onclick="window.location.href='profile.html'"
-          title="Hồ sơ của bạn"></button>
+        <button class="profile-btn" id="profileAvatarBtn" onclick="openEditProfile()" title="Hồ sơ của bạn"></button>
         <button class="add-btn" onclick="signOut()"
           style="background:var(--surface2);color:var(--text);border:1px solid var(--border);" title="Đăng xuất">Đăng
           xuất</button>
