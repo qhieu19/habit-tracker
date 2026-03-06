@@ -1253,83 +1253,139 @@ header {
   color: var(--text);
 }
 
-/* ── RESPONSIVE ── */
+/* ── RESPONSIVE OVERHAUL (Premium Mobile) ── */
 @media(max-width:700px) {
+  :root {
+    --container-px: 16px;
+  }
+
   header {
-    padding: 14px 18px;
+    padding: 12px var(--container-px);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    background: rgba(255, 255, 255, 0.8);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  }
+
+  .logo {
+    font-size: 19px;
+    letter-spacing: -0.5px;
+  }
+
+  .logo-dot {
+    width: 8px;
+    height: 8px;
+  }
+
+  .header-right {
+    gap: 10px;
+  }
+
+  .date-display,
+  .greeting,
+  .header-right .add-btn {
+    display: none !important;
+  }
+
+  /* Move logout to profile modal */
+
+  .streak-badge {
+    padding: 4px 10px;
+    font-size: 12px;
+    background: rgba(90, 158, 30, 0.1);
+    border: 1px solid rgba(90, 158, 30, 0.2);
   }
 
   .container {
-    padding: 18px 14px 60px;
+    padding: 16px var(--container-px) 100px;
   }
 
   .stats-row {
     grid-template-columns: repeat(2, 1fr);
-    gap: 10px;
+    gap: 12px;
+    margin-bottom: 24px;
   }
 
-  .card-top {
-    grid-template-columns: auto 1fr auto;
-    gap: 10px;
-  }
-
-  .week-dots {
-    display: none;
-  }
-
-  .profile-page {
-    margin: 30px auto;
+  .stat-card {
+    padding: 16px;
+    background: var(--surface);
+    border: 1px solid rgba(0, 0, 0, 0.04);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.03);
   }
 
   .stat-val {
-    font-size: 26px;
+    font-size: 24px;
+    margin: 4px 0;
   }
 
-  .logo {
+  .stat-label {
+    font-size: 10px;
+    opacity: 0.6;
+  }
+
+  .section-header {
+    margin-top: 24px;
+    margin-bottom: 16px;
+  }
+
+  .section-title {
     font-size: 18px;
   }
 
-  .greeting {
-    display: none !important;
+  /* Habit Cards Mobile */
+  .habit-card {
+    padding: 20px 16px;
+    margin-bottom: 16px;
+    border: 1px solid rgba(0, 0, 0, 0.05);
   }
 
-  /* Hide greeting on very small screens to save space */
-}
-
-@media(max-width:400px) {
-  .header-right {
-    gap: 6px;
+  .habit-info h4 {
+    font-size: 18px;
+    margin-bottom: 4px;
   }
 
-  .add-btn {
-    padding: 8px 12px;
+  .habit-meta {
+    flex-wrap: wrap;
+    gap: 8px;
     font-size: 12px;
   }
 
-  .date-display {
-    display: none;
+  .inc-row {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
   }
 
-  /* Hide date on iPhone SE-sized screens */
-  .stats-row {
-    grid-template-columns: 1fr;
+  .inc-btn {
+    width: 100%;
+    justify-content: center;
+    padding: 10px;
   }
 
-  /* Single column for very small screens */
-  .profile-avatar-large {
-    width: 50px;
-    height: 50px;
-    font-size: 22px;
+  /* iPhone 14 Pro Max & Large Viewports */
+  @media(min-width: 400px) {
+    .stats-row {
+      gap: 16px;
+    }
+
+    .stat-card {
+      padding: 20px;
+    }
   }
 
-  .profile-card {
-    padding: 24px 16px;
+  /* Support for Safari Notch & Home Bar */
+  @supports (padding: env(safe-area-inset-top)) {
+    header {
+      padding-top: calc(12px + env(safe-area-inset-top));
+    }
   }
-}
 
-/* Support for notch/bottom bar on mobile Safari */
-@supports (padding: env(safe-area-inset-bottom)) {
-  .container {
-    padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  @supports (padding: env(safe-area-inset-bottom)) {
+    .container {
+      padding-bottom: calc(100px + env(safe-area-inset-bottom));
+    }
   }
 }
